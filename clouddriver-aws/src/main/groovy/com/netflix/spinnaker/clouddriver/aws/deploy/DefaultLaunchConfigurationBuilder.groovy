@@ -266,7 +266,7 @@ class DefaultLaunchConfigurationBuilder implements LaunchConfigurationBuilder {
             if (snapshotId) {
               ebs.withSnapshotId(snapshotId)
             }
-            if (encrypted) {
+            if (encrypted != null) {
               ebs.withEncrypted(encrypted)
             }
           }

@@ -417,6 +417,54 @@ class DefaultLaunchConfigurationBuilderSpec extends Specification {
         new AmazonBlockDevice(deviceName: '/dev/sdb', virtualName: 'ephemeral1'),
         new AmazonBlockDevice(deviceName: "/dev/sdc", size: 125, iops: 100, deleteOnTermination: false, volumeType: 'io1', snapshotId: 's-69', encrypted: true)],
       securityGroups: securityGroups)
+  }
 
+  void "set encrpyted if it's false"() {
+    when:
+    builder.buildLaunchConfiguration(application, subnetType, settings, null)
+
+    then:
+    1 * securityGroupService.getSecurityGroupNamesFromIds(_) >> [:]
+    1 * securityGroupService.getSecurityGroupForApplication(application, subnetType) >> "sg-$application"
+    1 * autoScaling.createLaunchConfiguration(_ as CreateLaunchConfigurationRequest) >> { CreateLaunchConfigurationRequest req ->
+      assert req.blockDeviceMappings.size() == 2
+      req.blockDeviceMappings.first().with {
+        assert deviceName == '/dev/sdc'
+        assert virtualName == null/**/
+        assert ebs.snapshotId == 's-69'
+        assert ebs.volumeType == 'io1'
+        assert ebs.deleteOnTermination == false
+        assert ebs.iops == 100
+        assert ebs.volumeSize == 125
+        assert ebs.encrypted == false
+      }
+      req.blockDeviceMappings.last().with {
+        assert deviceName == '/dev/sdb1'
+        assert virtualName == null/**/
+        assert ebs.snapshotId == 's-1337'
+        assert ebs.volumeType == 'io1'
+        assert ebs.deleteOnTermination == false
+        assert ebs.iops == 200
+        assert ebs.volumeSize == 300
+        assert ebs.encrypted == null
+      }
+    }
+    0 * _
+
+    where:
+    application = 'foo'
+    subnetType = null
+    account = 'prod'
+    securityGroups = []
+    expectedGroups = ["sg-$application"]
+    settings = new LaunchConfigurationBuilder.LaunchConfigurationSettings(
+      account: 'prod',
+      region: 'us-east-1',
+      baseName: 'fooapp-v001',
+      suffix: '20150515',
+      blockDevices: [
+        new AmazonBlockDevice(deviceName: "/dev/sdc", size: 125, iops: 100, deleteOnTermination: false, volumeType: 'io1', snapshotId: 's-69', encrypted: false),
+        new AmazonBlockDevice(deviceName: "/dev/sdb1", size: 300, iops: 200, deleteOnTermination: false, volumeType: 'io1', snapshotId: 's-1337')],
+      securityGroups: securityGroups)
   }
 }

@@ -646,7 +646,10 @@ class BasicAmazonDeployHandlerUnitSpec extends Specification {
     new BlockDeviceMapping().withDeviceName("Device1").withEbs(new Ebs().withVolumeSize(1024))          || new AmazonBlockDevice("Device1", null, 1024, null, null, null, null, null)
     new BlockDeviceMapping().withDeviceName("Device1").withEbs(new Ebs().withVolumeType("volumeType"))  || new AmazonBlockDevice("Device1", null, null, "volumeType", null, null, null, null)
     new BlockDeviceMapping().withDeviceName("Device1").withEbs(new Ebs().withSnapshotId("snapshotId"))  || new AmazonBlockDevice("Device1", null, null, null, null, null, "snapshotId", null)
-    new BlockDeviceMapping().withDeviceName("Device1").withEbs(new Ebs().withEncrypted(true))  || new AmazonBlockDevice("Device1", null, null, null, null, null, null, true)
+    new BlockDeviceMapping().withDeviceName("Device1").withEbs(new Ebs())                               || new AmazonBlockDevice("Device1", null, null, null, null, null, null, null)
+    new BlockDeviceMapping().withDeviceName("Device1").withEbs(new Ebs().withEncrypted(null))           || new AmazonBlockDevice("Device1", null, null, null, null, null, null, null)
+    new BlockDeviceMapping().withDeviceName("Device1").withEbs(new Ebs().withEncrypted(true))           || new AmazonBlockDevice("Device1", null, null, null, null, null, null, true)
+    new BlockDeviceMapping().withDeviceName("Device1").withEbs(new Ebs().withEncrypted(false))          || new AmazonBlockDevice("Device1", null, null, null, null, null, null, false)
   }
 
   @Unroll
