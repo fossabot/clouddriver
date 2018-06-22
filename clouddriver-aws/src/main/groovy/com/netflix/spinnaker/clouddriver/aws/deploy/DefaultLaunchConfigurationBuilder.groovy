@@ -31,6 +31,7 @@ import com.netflix.spinnaker.clouddriver.aws.services.AsgService
 import com.netflix.spinnaker.clouddriver.aws.services.SecurityGroupService
 import com.netflix.spinnaker.clouddriver.helpers.OperationPoller
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials
+import groovy.util.logging.Log
 import groovy.util.logging.Slf4j
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.LocalDateTime
@@ -135,6 +136,7 @@ class DefaultLaunchConfigurationBuilder implements LaunchConfigurationBuilder {
    */
   @Override
   String buildLaunchConfiguration(String application, String subnetType, LaunchConfigurationSettings settings, Boolean legacyUdf) {
+    Log.Info("DefaultLaunchConfigurationBuilder.groovy:buildLaunchConfiguration:138")
     if (settings.suffix == null) {
       settings = settings.copyWith(suffix: createDefaultSuffix())
     }
@@ -226,6 +228,7 @@ class DefaultLaunchConfigurationBuilder implements LaunchConfigurationBuilder {
   }
 
   private String createLaunchConfiguration(String name, String userData, LaunchConfigurationSettings settings) {
+    Log.Info("DefaultLaunchConfigurationBuilder.groovy:createLaunchConfiguration:230")
 
     CreateLaunchConfigurationRequest request = new CreateLaunchConfigurationRequest()
       .withImageId(settings.ami)
@@ -266,6 +269,9 @@ class DefaultLaunchConfigurationBuilder implements LaunchConfigurationBuilder {
             if (snapshotId) {
               ebs.withSnapshotId(snapshotId)
             }
+
+            Log.Info("DefaultLaunchConfigurationBuilder.groovy:createLaunchConfiguration:272 this is where we would have set Encrypted:")
+            Log.Info("{}", encrypted)
 //            if (encrypted != null) {
 //              ebs.withEncrypted(encrypted)
 //            }

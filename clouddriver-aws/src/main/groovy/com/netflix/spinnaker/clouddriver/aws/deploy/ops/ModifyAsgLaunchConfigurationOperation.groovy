@@ -28,6 +28,7 @@ import com.netflix.spinnaker.clouddriver.aws.services.RegionScopedProviderFactor
 import com.netflix.spinnaker.clouddriver.data.task.Task
 import com.netflix.spinnaker.clouddriver.data.task.TaskRepository
 import com.netflix.spinnaker.clouddriver.orchestration.AtomicOperation
+import groovy.util.logging.Log
 import org.springframework.beans.factory.annotation.Autowired
 
 class ModifyAsgLaunchConfigurationOperation implements AtomicOperation<Void> {
@@ -96,21 +97,28 @@ class ModifyAsgLaunchConfigurationOperation implements AtomicOperation<Void> {
       props.securityGroups = settings.securityGroups + description.securityGroups
     }
 
+    Log.Info("ModifyAsgLaunchConfigurationOperation.groovy:operate:100")
     //if we are changing instance types and don't have explicitly supplied block device mappings
     if (!description.blockDevices && description.instanceType != null && description.instanceType != settings.instanceType) {
       if (!description.copySourceCustomBlockDeviceMappings) {
+        Log.Info("ModifyAsgLaunchConfigurationOperation.groovy:operate:104")
         props.blockDevices = blockDeviceConfig.getBlockDevicesForInstanceType(description.instanceType)
       } else {
+        Log.Info("ModifyAsgLaunchConfigurationOperation.groovy:operate:107")
+        // todo: this is use snapshot's block devices
         def blockDevicesForSourceLaunchConfig = settings.blockDevices.collect {
-          [deviceName: it.deviceName, virtualName: it.virtualName, size: it.size]
+          [deviceName: it.deviceName, virtualName: it.virtualName, size: it.size, encrypted: it.encrypted]
         }.sort { it.deviceName }
-        def blockDevicesForSourceInstanceType = blockDeviceConfig.getBlockDevicesForInstanceType(
-            settings.instanceType
-        ).collect {
+        Log.Info("{}", blockDevicesForSourceLaunchConfig)
+
+        // todo this is use instance default
+        def blockDevicesForSourceInstanceType = blockDeviceConfig.getBlockDevicesForInstanceType(settings.instanceType).collect {
           [deviceName: it.deviceName, virtualName: it.virtualName, size: it.size]
         }.sort { it.deviceName }
 
+        // todo: in goodrx its not equal, so skip
         if (blockDevicesForSourceLaunchConfig == blockDevicesForSourceInstanceType) {
+          Log.Info("ModifyAsgLaunchConfigurationOperation.groovy:operate:121")
           // use default block mappings for the new instance type (since default block mappings were used on the previous instance type)
           props.blockDevices = blockDeviceConfig.getBlockDevicesForInstanceType(description.instanceType)
         }
@@ -118,12 +126,18 @@ class ModifyAsgLaunchConfigurationOperation implements AtomicOperation<Void> {
     }
 
     def newSettings = settings.copyWith(props)
+    Log.Info("ModifyAsgLaunchConfigurationOperation.groovy:operate:129")
+    Log.Info("{}", props)
+    Log.Info("{}", settings)
+    Log.Info("{}", newSettings)
+
 
     if (newSettings == settings && description.legacyUdf == null) {
       task.updateStatus BASE_PHASE, "No changes required for launch configuration on $description.asgName in $description.region"
     } else {
       newSettings = newSettings.copyWith(suffix: null)
       def name = Names.parseName(description.asgName)
+      Log.Info("ModifyAsgLaunchConfigurationOperation.groovy:operate:140")
       def newLc = lcBuilder.buildLaunchConfiguration(name.app, description.subnetType, newSettings, description.legacyUdf)
 
       def autoScaling = regionScopedProvider.autoScaling
