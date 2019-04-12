@@ -1,6 +1,7 @@
 Spinnaker Cloud Provider Service
 ------------------------------------
 [![Build Status](https://api.travis-ci.org/spinnaker/clouddriver.svg?branch=master)](https://travis-ci.org/spinnaker/clouddriver)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Farmory-io%2Fclouddriver.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Farmory-io%2Fclouddriver?ref=badge_shield)
 
 This service is the main integration point for Spinnaker cloud providers like AWS, GCE, CloudFoundry, Azure etc. 
 
@@ -20,3 +21,7 @@ To start the JVM in debug mode, set the Java system property `DEBUG=true`:
 The JVM will then listen for a debugger to be attached on port 7102.  The JVM will _not_ wait for
 the debugger to be attached before starting Clouddriver; the relevant JVM arguments can be seen and
 modified as needed in `build.gradle`.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Farmory-io%2Fclouddriver.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Farmory-io%2Fclouddriver?ref=badge_large)
